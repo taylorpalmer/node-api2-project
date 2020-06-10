@@ -5,10 +5,7 @@ const router = express.Router();
 
 router.get("/api/posts", (req, res) => {
   posts
-    .find({
-      sortBy: req.query.sort,
-      limit: req.query.limit,
-    })
+    .find()
     .then((posts) => {
       res.status(200).json(posts);
     })
@@ -43,17 +40,13 @@ router.get("/api/posts/:id", (req, res) => {
 router.get("/api/posts/:id/comments", (req, res) => {
   posts
     .findCommentById(req.params.id)
-    .then((post) => {
-      if (!req.params.id) {
+    .then((comments) => {
+      if (!comments) {
         res.status(404).json({
           message: "The post with the specified ID does not exist.",
         });
-      } else if (!req.body.text) {
-        res.status(400).json({
-          errorMessage: "Please provide text for the comment.",
-        });
       } else {
-        res.status(200).json(post);
+        res.status(200).json(comments);
       }
     })
     .catch((error) => {
@@ -70,9 +63,27 @@ router.post("/api/posts", (req, res) => {
       errorMessage: "Please provide title and contents for the post.",
     });
   }
+
+  posts
+    .add(req.body)
+    .then((post) => {
+      res.status(201).json(post);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({
+        error: "There was an error while saving the post to the database",
+      });
+    });
 });
 
-router.post("/api/posts/:id", (req, res) => {});
+router.post("/api/posts/:id", (req, res) => {
+  if (!req.params.id) {
+    return res.status(404).json({
+      message: "The post with the specified ID does not exist.",
+    });
+  }
+});
 
 router.delete("/api/posts/:id", (req, res) => {});
 
