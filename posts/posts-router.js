@@ -82,9 +82,33 @@ router.post("/api/posts/:id", (req, res) => {
     return res.status(404).json({
       message: "The post with the specified ID does not exist.",
     });
+  } else if(!req.body.text) {
+      res.status(400).json({
+        errorMessage: "Please provide text for the comment."
+      })
   }
+  posts
+    .insertComment()
+    .then((comment) => {
+        res.status(201).json(comment)
+    })
+    .catch((error) => {
+        console.log(error);
+        res.status(500).json({
+          error: "There was an error while saving the comment to the database",
+        });
 });
 
-router.delete("/api/posts/:id", (req, res) => {});
+router.delete("/api/posts/:id", (req, res) => {
+    if (!req.params.id) {
+        return res.status(404).json({
+          message: "The post with the specified ID does not exist.",
+        });
+      } else {
+        res.status(500).json({
+            error: "The post could not be removed"
+        });
+      }
+});
 
 module.exports = router;
